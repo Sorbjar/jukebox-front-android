@@ -1,4 +1,4 @@
-package be.lode.jukebox.front.android.model;
+package be.lode.jukebox.front.android.artist;
 
 /**
  * Created by LOD on 27/4/2015.

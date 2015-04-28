@@ -1,4 +1,4 @@
-package be.lode.jukebox.front.android.model;
+package be.lode.jukebox.front.android.artist;
 
 import android.content.Context;
 import android.util.Log;
@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import be.lode.jukebox.front.android.Constants;
 import be.lode.jukebox.front.android.R;
 
 /**
@@ -19,14 +20,13 @@ public class ArtistListAdapter extends BaseAdapter {
     private ArrayList listData;
     private LayoutInflater layoutInflater = null;
     protected Context context;
-    private static final String LOGTAG = "JukeboxLog";
+    private static final String LOGTAG = Constants.getLogtag();
 
     public ArtistListAdapter(Context context, ArrayList listData) {
         this.listData = listData;
         this.context = context;
         layoutInflater = LayoutInflater.from(context);
         Log.i(LOGTAG, "ArtistListAdapter constructor executed.");
-
     }
 
     @Override
