@@ -29,7 +29,7 @@ public class MainActivity extends ListActivity {
     private static final String LOGTAG = "JukeboxLog";
     private static final String ARTIST_URL = "http://192.168.4.158:8080/allartists";
     private ListAdapter artistListAdapter;
-    private ArrayList<ArtistItem> listData = new ArrayList<ArtistItem>();;
+    private ArrayList<ArtistItem> listData = new ArrayList<ArtistItem>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +89,6 @@ public class MainActivity extends ListActivity {
 
                 } else {
                     Log.i(LOGTAG, "Failed: No entity");
-                    //TODO: process JSON failure.
                 }
             }catch(Exception e){
                 Log.i(LOGTAG,"Exception occurred: Trace="+e.getStackTrace());
