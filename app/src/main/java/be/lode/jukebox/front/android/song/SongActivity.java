@@ -83,6 +83,8 @@ public class SongActivity extends ListActivity {
                 HttpGet request = new HttpGet();
 
                 String artistEncoded = URLEncoder.encode(artistName, "UTF-8");
+
+                String aa = SONG_URL + "?artist=" + artistName;
                 String uri = SONG_URL + "?artist=" + artistEncoded;
                 request.setURI(new URI(uri));
 
