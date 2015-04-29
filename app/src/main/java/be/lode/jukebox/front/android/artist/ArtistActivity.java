@@ -45,7 +45,13 @@ public class ArtistActivity extends ListActivity {
         //Start async task
         new GetArtist().execute();
     }
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(LOGTAG, this.getClass().getSimpleName() + " onPause");
+        // Logs 'app deactivate' App Event.
+        //AppEventsLogger.deactivateApp(this);
+    }
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         Log.i(LOGTAG, this.getClass().getSimpleName() + " onListItemClick");

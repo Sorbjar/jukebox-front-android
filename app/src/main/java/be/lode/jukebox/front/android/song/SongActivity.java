@@ -48,7 +48,13 @@ public class SongActivity extends ListActivity {
         //Start async task
         new GetSong().execute();
     }
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(LOGTAG, this.getClass().getSimpleName() + " onPause");
+        // Logs 'app deactivate' App Event.
+        //AppEventsLogger.deactivateApp(this);
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.i(LOGTAG, this.getClass().getSimpleName() + " onCreateOptionsMenu");
@@ -82,10 +88,11 @@ public class SongActivity extends ListActivity {
                 HttpClient client = new DefaultHttpClient();
                 HttpGet request = new HttpGet();
 
-                String artistEncoded = URLEncoder.encode(artistName, "UTF-8");
-
-                String aa = SONG_URL + "?artist=" + artistName;
-                String uri = SONG_URL + "?artist=" + artistEncoded;
+                String uri = SONG_URL;
+                if(artistName != null && artistName.length() > 0) {
+                    String artistEncoded = URLEncoder.encode(artistName, "UTF-8");
+                    uri = SONG_URL + "?artist=" + artistEncoded;
+                }
                 request.setURI(new URI(uri));
 
                 HttpResponse response = client.execute(request);
