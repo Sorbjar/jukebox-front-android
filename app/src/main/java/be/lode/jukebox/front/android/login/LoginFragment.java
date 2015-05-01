@@ -17,7 +17,7 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
 import be.lode.jukebox.front.android.R;
-import be.lode.jukebox.front.android.artist.ArtistActivity;
+import be.lode.jukebox.front.android.choosejukebox.ChooseJukeboxActivity;
 
 public class LoginFragment extends Fragment {
 
@@ -31,10 +31,7 @@ public class LoginFragment extends Fragment {
             public void onSuccess(LoginResult loginResult) {
                 AccessToken accesToken = loginResult.getAccessToken();
                 Profile profile = Profile.getCurrentProfile();
-                //TODO stuff with profile
-                Intent intent = new Intent(getActivity(),ArtistActivity.class);
-                getActivity().startActivity(intent);
-                getActivity().finish();
+                nextPage(profile);
             }
 
             @Override
@@ -49,11 +46,22 @@ public class LoginFragment extends Fragment {
         };
     }
 
+    private void nextPage(Profile profile) {
+        Intent intent = new Intent(getActivity(),ChooseJukeboxActivity.class);
+        getActivity().startActivity(intent);
+        getActivity().finish();
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
+        Profile profile = Profile.getCurrentProfile();
+        if(profile != null)
+        {
+            nextPage(profile);
+        }
     }
 
     @Override
@@ -66,7 +74,11 @@ public class LoginFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        //TODO keep login, profile tracker accestoken tracker
+        Profile profile = Profile.getCurrentProfile();
+        if(profile != null)
+        {
+            nextPage(profile);
+        }
     }
 
     @Override

@@ -5,7 +5,7 @@ package be.lode.jukebox.front.android;
  */
 public class Constants {
     private static final String LOGTAG = "JukeboxLog";
-    private static final String URL = "http://192.168.56.1:8080/";
+    private static final String URL = "http://192.168.1.28:8080/";
 
     public static String getUrl() {
         return URL;

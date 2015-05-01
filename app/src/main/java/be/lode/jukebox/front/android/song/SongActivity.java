@@ -59,7 +59,7 @@ public class SongActivity extends ListActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.i(LOGTAG, this.getClass().getSimpleName() + " onCreateOptionsMenu");
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_song, menu);
         return true;
     }
 
@@ -72,7 +72,7 @@ public class SongActivity extends ListActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_logout) {
             return true;
         }
 

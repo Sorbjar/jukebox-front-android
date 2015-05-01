@@ -2,7 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
     tools:context="be.lode.jukebox.front.android.login.LoginFragment">
     >
 
@@ -13,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:text="@string/facebook_login_text"
-        android:textColor="@color/listitemdivider" />
+        android:textColor="@color/contrast" />
 
     <com.facebook.login.widget.LoginButton
         android:id="@+id/login_button"

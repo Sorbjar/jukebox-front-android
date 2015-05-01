@@ -1,4 +1,4 @@
-package be.lode.jukebox.front.android.song;
+package be.lode.jukebox.front.android.choosejukebox;
 
 import android.content.Context;
 import android.util.Log;
@@ -16,17 +16,17 @@ import be.lode.jukebox.front.android.R;
 /**
  * Created by Lode on 28/04/2015.
  */
-public class SongListAdapter extends BaseAdapter {
+public class JukeboxListAdapter extends BaseAdapter {
     private ArrayList listData;
     private LayoutInflater layoutInflater = null;
     protected Context context;
     private static final String LOGTAG = Constants.getLogtag();
 
-    public SongListAdapter(Context context, ArrayList listData) {
+    public JukeboxListAdapter(Context context, ArrayList listData) {
         this.listData = listData;
         this.context = context;
         layoutInflater = LayoutInflater.from(context);
-        Log.i(LOGTAG, "SongListAdapter constructor executed.");
+        Log.i(LOGTAG, "JukeboxListAdapter constructor executed.");
 
     }
 
@@ -47,8 +47,7 @@ public class SongListAdapter extends BaseAdapter {
 
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
-        //conver
-        // tView = The old view to reuse, if possible. Note: You should check that this view is non-null and of an appropriate type before using.
+        //convertView = The old view to reuse, if possible. Note: You should check that this view is non-null and of an appropriate type before using.
         if (convertView == null) {
             //create new holder & inflate view
             convertView = layoutInflater.inflate(R.layout.row_item, null);
@@ -60,7 +59,7 @@ public class SongListAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        SongItem item = (SongItem) listData.get(position);
+        JukeboxItem item = (JukeboxItem) listData.get(position);
         holder.nameView.setText(item.getName());
         return convertView;
     }

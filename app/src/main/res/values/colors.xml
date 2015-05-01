@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="listitemdivider">#CACECF</color>
+    <color name="contrast">#CACECF</color>
     <color name="background">#444d50</color>
     <color name="focus">#07a9ca</color>
 </resources>
