@@ -35,12 +35,16 @@ public class ArtistActivity extends ListActivity {
     private ListAdapter artistListAdapter;
     private ArrayList<ArtistItem> listData = new ArrayList<ArtistItem>();
     private static final int SHOW_SONGS_ITEM = 1;
+    private String jukeboxId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(LOGTAG, this.getClass().getSimpleName() + " onCreate");
         setContentView(R.layout.activity_artist);
+
+        Intent i = getIntent();
+        jukeboxId = i.getStringExtra("jukeboxId");
 
         //Start async task
         new GetArtist().execute();
@@ -63,6 +67,7 @@ public class ArtistActivity extends ListActivity {
         //serialize the data of the food and put as extra in an Intent.
         Intent i = new Intent(ArtistActivity.this, SongActivity.class);
         i.putExtra("artistName", artistData.getName());
+        i.putExtra("jukeboxId", jukeboxId);
         startActivityForResult(i,SHOW_SONGS_ITEM);
     }
 

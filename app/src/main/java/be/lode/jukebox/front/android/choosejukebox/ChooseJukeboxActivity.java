@@ -64,10 +64,11 @@ public class ChooseJukeboxActivity extends ListActivity {
         super.onListItemClick(l, v, position, id);
 
         Object o = jukeboxListAdapter.getItem(position);
-        JukeboxItem artistData = (JukeboxItem) o;
+        JukeboxItem jukeboxData = (JukeboxItem) o;
 
         //serialize the data of the food and put as extra in an Intent.
         Intent i = new Intent(ChooseJukeboxActivity.this, ArtistActivity.class);
+        i.putExtra("jukeboxId", jukeboxData.getId());
         startActivityForResult(i, SHOW_ARTISTS_ITEM);
     }
 
@@ -127,10 +128,10 @@ public class ChooseJukeboxActivity extends ListActivity {
                     JSONObject respObject = new JSONObject(EntityUtils.toString(entity));
                     JSONArray jukeboxArray = respObject.getJSONArray("allJukeboxes");
                     for (int i = 0; i < jukeboxArray.length(); i++) {
-                        String jukebox = jukeboxArray.getString(i);
-                        //JSONObject song = songArray.getJSONObject(i);
+                        JSONObject jukebox = jukeboxArray.getJSONObject(i);
                         JukeboxItem item = new JukeboxItem();
-                        item.setName(jukebox);
+                        item.setName(jukebox.getString("name"));
+                        item.setId(jukebox.getString("id"));
                         listData.add(item);
                     }
 
