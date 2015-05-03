@@ -94,7 +94,8 @@ public class PayActivity extends Activity implements View.OnClickListener {
         if (pp == null) {  // Test to see if the library is already initialized
 
             // This main initialization call takes your Context, AppID, and target server
-            pp = PayPal.initWithAppID(this, Constants.getPayPalSandboxAppId(), PayPal.ENV_NONE);
+            //TODO set live
+            pp = PayPal.initWithAppID(this, Constants.getPayPalSandboxAppId(), PayPal.ENV_SANDBOX);
 
             // Required settings:
 

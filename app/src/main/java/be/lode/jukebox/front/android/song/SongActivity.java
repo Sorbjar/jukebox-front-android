@@ -106,10 +106,6 @@ public class SongActivity extends ListActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    //Paypal part
-    //TODO move paypal to new activity, summarise purchase and add paypal button
-
-
 
     private class GetSong extends AsyncTask<Void, Void, Void> {
         @Override
