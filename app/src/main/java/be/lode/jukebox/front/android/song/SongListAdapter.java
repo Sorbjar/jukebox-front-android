@@ -17,10 +17,10 @@ import be.lode.jukebox.front.android.R;
  * Created by Lode on 28/04/2015.
  */
 public class SongListAdapter extends BaseAdapter {
+    private static final String LOGTAG = Constants.getLogtag();
+    protected Context context;
     private ArrayList listData;
     private LayoutInflater layoutInflater = null;
-    protected Context context;
-    private static final String LOGTAG = Constants.getLogtag();
 
     public SongListAdapter(Context context, ArrayList listData) {
         this.listData = listData;

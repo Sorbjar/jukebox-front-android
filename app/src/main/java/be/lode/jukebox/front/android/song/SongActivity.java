@@ -1,5 +1,6 @@
 package be.lode.jukebox.front.android.song;
 
+import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -12,9 +13,13 @@ import android.view.View;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 
 import com.paypal.android.MEP.CheckoutButton;
 import com.paypal.android.MEP.PayPal;
+import com.paypal.android.MEP.PayPalActivity;
+import com.paypal.android.MEP.PayPalInvoiceData;
+import com.paypal.android.MEP.PayPalPayment;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -25,13 +30,14 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import be.lode.jukebox.front.android.Constants;
 import be.lode.jukebox.front.android.R;
-import android.widget.RelativeLayout.LayoutParams;
+
 /**
  * Created by Lode on 28/04/2015.
  */
@@ -62,6 +68,7 @@ public class SongActivity extends ListActivity implements View.OnClickListener {
         //Start async task
         new GetSong().execute();
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -69,6 +76,7 @@ public class SongActivity extends ListActivity implements View.OnClickListener {
         // Logs 'app deactivate' App Event.
         //AppEventsLogger.deactivateApp(this);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.i(LOGTAG, this.getClass().getSimpleName() + " onCreateOptionsMenu");
@@ -89,9 +97,8 @@ public class SongActivity extends ListActivity implements View.OnClickListener {
         //serialize the data of the food and put as extra in an Intent.
         //TODO paypal
         //Start async task
-        if(!paypalLibraryInit)
+        if (!paypalLibraryInit)
             initPaypalLibrary();
-        new OrderSong().execute();
 
     }
 
@@ -111,62 +118,6 @@ public class SongActivity extends ListActivity implements View.OnClickListener {
         return super.onOptionsItemSelected(item);
     }
 
-
-
-    private class GetSong extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... params) {
-            Log.i(LOGTAG, this.getClass().getSimpleName() + " doInBackground");
-            // Loads JSON file and process data
-            try {
-                HttpClient client = new DefaultHttpClient();
-                HttpGet request = new HttpGet();
-
-                String uri = SONG_URL;
-                if(artistName != null && artistName.length() > 0) {
-                    String artistEncoded = URLEncoder.encode(artistName, "UTF-8");
-                    uri = SONG_URL + "?artist=" + artistEncoded;
-                }
-                request.setURI(new URI(uri));
-
-                HttpResponse response = client.execute(request);
-                HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                    JSONObject respObject = new JSONObject(EntityUtils.toString(entity));
-                    JSONArray songArray = respObject.getJSONArray("allTitles");
-                    for (int i = 0; i < songArray.length(); i++) {
-                        String song = songArray.getString(i);
-                        //JSONObject song = songArray.getJSONObject(i);
-                        SongItem item = new SongItem();
-                        item.setName(song);
-                        listData.add(item);
-                    }
-
-                } else {
-                    Log.i(LOGTAG, "Failed: No entity");
-                }
-            }catch(Exception e){
-                Log.i(LOGTAG,"Exception occurred: " + e.toString());
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            Log.i(LOGTAG, this.getClass().getSimpleName() + " onPreExecute");
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            Log.i(LOGTAG, this.getClass().getSimpleName() + " onPostExecute");
-            // set adapter after async task has loaded json file.
-            songListAdapter = new SongListAdapter(getApplicationContext(), listData);
-            setListAdapter(songListAdapter);
-        }
-    }
-
     //Paypal part
     public void initPaypalLibrary() {
         PayPal pp = PayPal.getInstance();
@@ -174,7 +125,7 @@ public class SongActivity extends ListActivity implements View.OnClickListener {
         if (pp == null) {  // Test to see if the library is already initialized
 
             // This main initialization call takes your Context, AppID, and target server
-            pp = PayPal.initWithAppID(this, "APP-80W284485P519543T", PayPal.ENV_NONE);
+            pp = PayPal.initWithAppID(this, Constants.getPayPalSandboxAppId(), PayPal.ENV_NONE);
 
             // Required settings:
 
@@ -201,7 +152,30 @@ public class SongActivity extends ListActivity implements View.OnClickListener {
         }
     }
 
-    private void PayPalButtonClick(View v) {
+    public void PayPalButtonClick(View arg0) {
+// Create a basic PayPal payment
+        PayPalPayment payment = new PayPalPayment();
+
+// Set the currency type
+        payment.setCurrencyType("EUR");
+
+// Set the recipient for the payment (can be a phone number)
+        payment.setRecipient("lode.deckers-receiver@gmail.com");
+
+// Set the payment amount, excluding tax and shipping costs
+        payment.setSubtotal(new BigDecimal(1.23));
+
+// Set the payment type--his can be PAYMENT_TYPE_GOODS,
+// PAYMENT_TYPE_SERVICE, PAYMENT_TYPE_PERSONAL, or PAYMENT_TYPE_NONE
+        payment.setPaymentType(PayPal.PAYMENT_TYPE_GOODS);
+
+// PayPalInvoiceData can contain tax and shipping amounts, and an
+// ArrayList of PayPalInvoiceItem that you can fill out.
+// These are not required for any transaction.
+        PayPalInvoiceData invoice = new PayPalInvoiceData();
+
+// Set the tax amount
+        //invoice.setTax(new BigDecimal(_taxAmount));
     }
 
     private void showPayPalButton() {
@@ -214,14 +188,104 @@ public class SongActivity extends ListActivity implements View.OnClickListener {
         launchPayPalButton.setOnClickListener(this);
 
 // Add the listener to the layout
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams (LayoutParams.WRAP_CONTENT,
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         params.bottomMargin = 10;
         launchPayPalButton.setLayoutParams(params);
+        /*
         launchPayPalButton.setId(PAYPAL_BUTTON_ID);
-        ((RelativeLayout) findViewById(R.id.RelativeLayout01)).addView(launchPayPalButton);
-        ((RelativeLayout) findViewById(R.id.RelativeLayout01)).setGravity(Gravity.CENTER_HORIZONTAL);
+        */
+        ((RelativeLayout) findViewById(R.id.activity_song)).addView(launchPayPalButton);
+        ((RelativeLayout) findViewById(R.id.activity_song)).setGravity(Gravity.CENTER_HORIZONTAL);
+
+    }
+
+    public void PayPalActivityResult(int requestCode, int resultCode, Intent intent) {
+        switch (resultCode) {
+// The payment succeeded
+            case Activity.RESULT_OK:
+                String payKey = intent.getStringExtra(PayPalActivity.EXTRA_PAY_KEY);
+                this.paymentSucceeded(payKey);
+                break;
+
+// The payment was canceled
+            case Activity.RESULT_CANCELED:
+                this.paymentCanceled();
+                break;
+
+// The payment failed, get the error from the EXTRA_ERROR_ID and EXTRA_ERROR_MESSAGE
+            case PayPalActivity.RESULT_FAILURE:
+                String errorID = intent.getStringExtra(PayPalActivity.EXTRA_ERROR_ID);
+                String errorMessage = intent.getStringExtra(PayPalActivity.EXTRA_ERROR_MESSAGE);
+                this.paymentFailed(errorID, errorMessage);
+        }
+    }
+
+    private void paymentFailed(String errorID, String errorMessage) {
+        //TODO payment failed
+    }
+
+    private void paymentCanceled() {
+        //TODO payment cancelled
+    }
+
+    private void paymentSucceeded(String payKey) {
+        new OrderSong().execute();
+    }
+
+    private class GetSong extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.i(LOGTAG, this.getClass().getSimpleName() + " doInBackground");
+            // Loads JSON file and process data
+            try {
+                HttpClient client = new DefaultHttpClient();
+                HttpGet request = new HttpGet();
+
+                String uri = SONG_URL;
+                if (artistName != null && artistName.length() > 0) {
+                    String artistEncoded = URLEncoder.encode(artistName, "UTF-8");
+                    uri = SONG_URL + "?artist=" + artistEncoded;
+                }
+                request.setURI(new URI(uri));
+
+                HttpResponse response = client.execute(request);
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    JSONObject respObject = new JSONObject(EntityUtils.toString(entity));
+                    JSONArray songArray = respObject.getJSONArray("allTitles");
+                    for (int i = 0; i < songArray.length(); i++) {
+                        String song = songArray.getString(i);
+                        //JSONObject song = songArray.getJSONObject(i);
+                        SongItem item = new SongItem();
+                        item.setName(song);
+                        listData.add(item);
+                    }
+
+                } else {
+                    Log.i(LOGTAG, "Failed: No entity");
+                }
+            } catch (Exception e) {
+                Log.i(LOGTAG, "Exception occurred: " + e.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Log.i(LOGTAG, this.getClass().getSimpleName() + " onPreExecute");
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            Log.i(LOGTAG, this.getClass().getSimpleName() + " onPostExecute");
+            // set adapter after async task has loaded json file.
+            songListAdapter = new SongListAdapter(getApplicationContext(), listData);
+            setListAdapter(songListAdapter);
+        }
     }
 
     private class OrderSong extends AsyncTask<Void, Void, Void> {
@@ -235,7 +299,7 @@ public class SongActivity extends ListActivity implements View.OnClickListener {
 
                 String uri = ORDERSONG_URL;
 
-                if(artistName != null && artistName.length() > 0 && songName != null && songName.length() > 0) {
+                if (artistName != null && artistName.length() > 0 && songName != null && songName.length() > 0) {
                     String artistNameEncoded = URLEncoder.encode(artistName, "UTF-8");
                     String songNameEncoded = URLEncoder.encode(songName, "UTF-8");
                     String jukeboxIdEncoded = URLEncoder.encode(jukeboxId, "UTF-8");
@@ -252,8 +316,8 @@ public class SongActivity extends ListActivity implements View.OnClickListener {
                 } else {
                     Log.i(LOGTAG, "Failed: No entity");
                 }
-            }catch(Exception e){
-                Log.i(LOGTAG,"Exception occurred: " + e.toString());
+            } catch (Exception e) {
+                Log.i(LOGTAG, "Exception occurred: " + e.toString());
             }
             return null;
         }
