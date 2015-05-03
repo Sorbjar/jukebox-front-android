@@ -7,4 +7,7 @@
     <string name="facebook_login_text">Welcome to the jukebox app</string>
     <string name="title_activity_login">Login</string>
     <string name="title_activity_choose_jukebox">Login to a jukebox</string>
+    <string name="title_activity_pay">PayActivity</string>
+
+    <string name="hello_world">Hello world!</string>
 </resources>
