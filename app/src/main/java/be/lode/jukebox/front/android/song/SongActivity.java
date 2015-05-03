@@ -99,6 +99,7 @@ public class SongActivity extends ListActivity implements View.OnClickListener {
         //Start async task
         if (!paypalLibraryInit)
             initPaypalLibrary();
+        showPayPalButton();
 
     }
 
@@ -193,9 +194,8 @@ public class SongActivity extends ListActivity implements View.OnClickListener {
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         params.bottomMargin = 10;
         launchPayPalButton.setLayoutParams(params);
-        /*
+
         launchPayPalButton.setId(PAYPAL_BUTTON_ID);
-        */
         ((RelativeLayout) findViewById(R.id.activity_song)).addView(launchPayPalButton);
         ((RelativeLayout) findViewById(R.id.activity_song)).setGravity(Gravity.CENTER_HORIZONTAL);
 
