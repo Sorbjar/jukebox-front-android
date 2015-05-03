@@ -50,7 +50,7 @@ public class ChooseJukeboxActivity extends ListActivity {
         Intent i = getIntent();
 
 
-        serviceName = "Facebook";
+        serviceName = "facebook";
         profile = Profile.getCurrentProfile();
         serviceId  = profile.getId();
 
