@@ -22,6 +22,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -30,7 +33,10 @@ import java.net.URLEncoder;
 import be.lode.jukebox.front.android.Constants;
 import be.lode.jukebox.front.android.R;
 import be.lode.jukebox.front.android.artist.ArtistActivity;
+import be.lode.jukebox.front.android.choosejukebox.JukeboxItem;
 import be.lode.jukebox.front.android.login.LoginActivity;
+import be.lode.jukebox.front.android.song.SongItem;
+import be.lode.jukebox.front.android.song.SongListAdapter;
 import be.lode.jukebox.front.android.splash.Splash;
 
 public class PayActivity extends Activity implements View.OnClickListener {
@@ -44,6 +50,9 @@ public class PayActivity extends Activity implements View.OnClickListener {
     private String artistName;
     private String songName;
     private String jukeboxId;
+    private BigDecimal price;
+    private String currency;
+    private String paymentReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +63,9 @@ public class PayActivity extends Activity implements View.OnClickListener {
         artistName = i.getStringExtra("artistName");
         songName = i.getStringExtra("songName");
         jukeboxId = i.getStringExtra("jukeboxId");
+
+        //Start async task
+        new GetPaypal().execute();
 
         if (!paypalLibraryInit)
             initPaypalLibrary();
@@ -127,26 +139,34 @@ public class PayActivity extends Activity implements View.OnClickListener {
     }
 
     public void PayPalButtonClick(View arg0) {
+        //TODO can't perform payment
+        //TODO if price  =  0 => order freely
 // Create a basic PayPal payment
         PayPalPayment payment = new PayPalPayment();
 
 // Set the currency type
-        payment.setCurrencyType("EUR");
+        if(currency ==  null || currency.length() == 0)
+            payment.setCurrencyType("EUR");
+        else
+            payment.setCurrencyType(currency);
 
 // Set the recipient for the payment (can be a phone number)
-        payment.setRecipient("lode.deckers-receiver@gmail.com");
+        payment.setRecipient(paymentReceiver);
 
 // Set the payment amount, excluding tax and shipping costs
-        payment.setSubtotal(new BigDecimal(1.23));
+        if(price ==  null || price == new BigDecimal(0))
+            payment.setSubtotal(new BigDecimal(0.0));
+        else
+            payment.setSubtotal(price);
 
 // Set the payment type--his can be PAYMENT_TYPE_GOODS,
 // PAYMENT_TYPE_SERVICE, PAYMENT_TYPE_PERSONAL, or PAYMENT_TYPE_NONE
-        payment.setPaymentType(PayPal.PAYMENT_TYPE_GOODS);
+        payment.setPaymentType(PayPal.PAYMENT_TYPE_SERVICE);
 
 // PayPalInvoiceData can contain tax and shipping amounts, and an
 // ArrayList of PayPalInvoiceItem that you can fill out.
 // These are not required for any transaction.
-        PayPalInvoiceData invoice = new PayPalInvoiceData();
+        //PayPalInvoiceData invoice = new PayPalInvoiceData();
 
 // Set the tax amount
         //invoice.setTax(new BigDecimal(_taxAmount));
@@ -273,6 +293,59 @@ public class PayActivity extends Activity implements View.OnClickListener {
             super.onPostExecute(result);
             Log.i(LOGTAG, this.getClass().getSimpleName() + " onPostExecute");
             // set adapter after async task has loaded json file.
+        }
+    }
+
+    private class GetPaypal extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.i(LOGTAG, this.getClass().getSimpleName() + " doInBackground");
+            // Loads JSON file and process data
+            try {
+                HttpClient client = new DefaultHttpClient();
+                HttpGet request = new HttpGet();
+
+                String uri = PAYPAL_URL;
+                if (jukeboxId != null && artistName.length() > 0) {
+                    String jukeboxEncoded = URLEncoder.encode(jukeboxId, "UTF-8");
+                    uri = PAYPAL_URL + "?jukebox=" + jukeboxEncoded;
+                }
+                request.setURI(new URI(uri));
+
+                HttpResponse response = client.execute(request);
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    JSONObject respObject = new JSONObject(EntityUtils.toString(entity));
+                    JSONArray songArray = respObject.getJSONArray("allTitles");
+                    for (int i = 0; i < songArray.length(); i++) {
+                        JSONObject jukebox = jukeboxArray.getJSONObject(i);
+                        item.setName(jukebox.getString("name"));
+                        item.setId(jukebox.getString("id"));
+                        listData.add(item);
+                    }
+
+                } else {
+                    Log.i(LOGTAG, "Failed: No entity");
+                }
+            } catch (Exception e) {
+                Log.i(LOGTAG, "Exception occurred: " + e.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Log.i(LOGTAG, this.getClass().getSimpleName() + " onPreExecute");
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            Log.i(LOGTAG, this.getClass().getSimpleName() + " onPostExecute");
+            // set adapter after async task has loaded json file.
+            payListAdapter = new PayListAdapter(getApplicationContext(), listData);
+            setListAdapter(payListAdapter);
         }
     }
 }
