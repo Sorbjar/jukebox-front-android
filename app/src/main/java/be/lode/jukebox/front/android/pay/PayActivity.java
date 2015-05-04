@@ -29,6 +29,9 @@ import java.net.URLEncoder;
 
 import be.lode.jukebox.front.android.Constants;
 import be.lode.jukebox.front.android.R;
+import be.lode.jukebox.front.android.artist.ArtistActivity;
+import be.lode.jukebox.front.android.login.LoginActivity;
+import be.lode.jukebox.front.android.splash.Splash;
 
 public class PayActivity extends Activity implements View.OnClickListener {
 
@@ -183,6 +186,12 @@ public class PayActivity extends Activity implements View.OnClickListener {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        PayPalActivityResult(requestCode, resultCode, data);
+    }
+
     public void PayPalActivityResult(int requestCode, int resultCode, Intent intent) {
         switch (resultCode) {
 // The payment succeeded
@@ -214,6 +223,8 @@ public class PayActivity extends Activity implements View.OnClickListener {
 
     private void paymentSucceeded(String payKey) {
         new OrderSong().execute();
+        Intent intent = new Intent(PayActivity.this,ArtistActivity.class);
+        PayActivity.this.startActivity(intent);
     }
 
 

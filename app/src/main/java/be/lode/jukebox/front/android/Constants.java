@@ -5,7 +5,7 @@ package be.lode.jukebox.front.android;
  */
 public class Constants {
     private static final String LOGTAG = "JukeboxLog";
-    private static final String URL = "http://192.168.4.158:8080/";
+    private static final String URL = "http://192.168.212.101:8080/";
     private static final String PAYPALSANDBOXAPPID = "APP-80W284485P519543T";
 
     public static String getPayPalSandboxAppId() {
