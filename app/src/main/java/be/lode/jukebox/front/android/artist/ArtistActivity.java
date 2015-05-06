@@ -48,6 +48,8 @@ public class ArtistActivity extends ListActivity {
 
         //Start async task
         new GetArtist().execute();
+
+
     }
     @Override
     protected void onPause() {

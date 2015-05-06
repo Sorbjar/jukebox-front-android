@@ -13,6 +13,7 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
+import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
@@ -23,6 +24,7 @@ public class LoginFragment extends Fragment {
 
     private CallbackManager callbackManager;
     private FacebookCallback<LoginResult> callback;
+    private ProfileTracker pt;
 
     public LoginFragment() {
         super();
@@ -57,10 +59,34 @@ public class LoginFragment extends Fragment {
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
+        instantiateProfileTracker();
+
         Profile profile = Profile.getCurrentProfile();
         if(profile != null)
         {
             nextPage(profile);
+        }
+    }
+
+    private void instantiateProfileTracker() {
+        if(pt != null) {
+            pt = new ProfileTracker() {
+                @Override
+                protected void onCurrentProfileChanged(Profile oldProfile, Profile newProfile) {
+                    if (oldProfile == null && newProfile != null)
+                        nextPage(newProfile);
+                }
+            };
+            pt.startTracking();
+        }
+    }
+
+    private void closeProfileTracker()
+    {
+        if(pt != null)
+        {
+            pt.stopTracking();
+            pt = null;
         }
     }
 
@@ -75,6 +101,7 @@ public class LoginFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Profile profile = Profile.getCurrentProfile();
+        instantiateProfileTracker();
         if(profile != null)
         {
             nextPage(profile);
@@ -94,5 +121,11 @@ public class LoginFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        closeProfileTracker();
     }
 }

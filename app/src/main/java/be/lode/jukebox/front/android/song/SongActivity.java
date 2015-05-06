@@ -55,6 +55,8 @@ public class SongActivity extends ListActivity {
 
         //Start async task
         new GetSong().execute();
+
+        this.getActionBar().setTitle("Songs - " + artistName);
     }
 
     @Override

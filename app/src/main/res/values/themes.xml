@@ -2,13 +2,19 @@
 <resources>
     <style name="JukeboxTheme"
         parent="android:Theme.Holo">
-       <!-- <item name="android:background">@color/background</item> -->
         <item name="android:actionBarStyle">@style/JukeboxActionBar</item>
+        <item name="android:alertDialogStyle">@style/JukeboxAlertDialogStyle</item>
     </style>
 
     <style name="JukeboxActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
         <item name="android:background">@color/focus</item>
         <item name="android:textColor">@color/contrast</item>
+    </style>
+
+    <style name="JukeboxAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/focus</item>
+        <item name="android:textColorPrimary">@color/contrast</item>
+        <item name="android:background">@color/background</item>
     </style>
 
 </resources>

@@ -1,20 +1,23 @@
 package be.lode.jukebox.front.android.pay;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.paypal.android.MEP.CheckoutButton;
 import com.paypal.android.MEP.PayPal;
 import com.paypal.android.MEP.PayPalActivity;
-import com.paypal.android.MEP.PayPalInvoiceData;
 import com.paypal.android.MEP.PayPalPayment;
 
 import org.apache.http.HttpEntity;
@@ -23,29 +26,27 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 
 import be.lode.jukebox.front.android.Constants;
 import be.lode.jukebox.front.android.R;
 import be.lode.jukebox.front.android.artist.ArtistActivity;
-import be.lode.jukebox.front.android.choosejukebox.JukeboxItem;
-import be.lode.jukebox.front.android.login.LoginActivity;
-import be.lode.jukebox.front.android.song.SongItem;
-import be.lode.jukebox.front.android.song.SongListAdapter;
-import be.lode.jukebox.front.android.splash.Splash;
 
 public class PayActivity extends Activity implements View.OnClickListener {
 
     private static final String LOGTAG = Constants.getLogtag();
     private static final String ORDERSONG_URL = Constants.getUrl() + "ordersong";
+    private static final String PAYMENTINFO_URL = Constants.getUrl() + "paymentinformation";
     private static final int PAYPAL_BUTTON_ID = 10001;
+    private static final int FREE_BUTTON_ID = 20002;
     private static final int REQUEST_PAYPAL_CHECKOUT = 2;
     private CheckoutButton launchPayPalButton;
+    private Button freeButton;
     private boolean paypalLibraryInit;
     private String artistName;
     private String songName;
@@ -53,6 +54,7 @@ public class PayActivity extends Activity implements View.OnClickListener {
     private BigDecimal price;
     private String currency;
     private String paymentReceiver;
+    private String jukeboxName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,26 +66,48 @@ public class PayActivity extends Activity implements View.OnClickListener {
         songName = i.getStringExtra("songName");
         jukeboxId = i.getStringExtra("jukeboxId");
 
-        //Start async task
-        //TODO
-        //new GetPaypal().execute();
-        paymentReceiver = "lode.deckers-receiver@gmail.com";
+
+        paymentReceiver = "";
         currency = "EUR";
-        price = new BigDecimal(1.25);
+        price = new BigDecimal(0.0);
+        jukeboxName = "";
 
-
-        if (!paypalLibraryInit)
-            initPaypalLibrary();
-        showPayPalButton();
+        showButtons();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        showButtons();
+    }
 
+    private void showText() {
+
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+        df.setMinimumFractionDigits(0);
+        df.setGroupingUsed(false);
+        String priceString  = df.format(price);
+
+        TextView textV = (TextView) findViewById(R.id.text_pay);
+        String text = "\n\n\n";
+        text += "Your order: \n";
+        text += "Artist: " + artistName + "\n";
+        text += "Title: " + songName + "\n";
+        text += "Jukebox: " + jukeboxName + "\n";
+        text += "Price: " + priceString + " " + currency + "\n";
+        textV.setText(text);
+    }
+
+    private void showButtons() {
+        new GetPaymentInfo().execute();
+        showText();
         if (!paypalLibraryInit)
             initPaypalLibrary();
-        showPayPalButton();
+        if (price.doubleValue() > 0.0 && paymentReceiver != null && paymentReceiver.length() > 0)
+            showPayPalButton();
+        else
+            showFreeButton();
     }
 
     @Override
@@ -135,22 +159,21 @@ public class PayActivity extends Activity implements View.OnClickListener {
         }
     }
 
-
     @Override
     public void onClick(View v) {
         if (v == (CheckoutButton) findViewById(PAYPAL_BUTTON_ID)) {
             PayPalButtonClick(v);
+        } else if (v == (Button) findViewById(FREE_BUTTON_ID)) {
+            FreeButtonClick(v);
         }
     }
 
     public void PayPalButtonClick(View arg0) {
-        //TODO can't perform payment
-        //TODO if price  =  0 => order freely
 // Create a basic PayPal payment
         PayPalPayment payment = new PayPalPayment();
 
 // Set the currency type
-        if(currency ==  null || currency.length() == 0)
+        if (currency == null || currency.length() == 0)
             payment.setCurrencyType("EUR");
         else
             payment.setCurrencyType(currency);
@@ -159,7 +182,7 @@ public class PayActivity extends Activity implements View.OnClickListener {
         payment.setRecipient(paymentReceiver);
 
 // Set the payment amount, excluding tax and shipping costs
-        if(price ==  null || price == new BigDecimal(0))
+        if (price == null || price == new BigDecimal(0))
             payment.setSubtotal(new BigDecimal(0.0));
         else
             payment.setSubtotal(price);
@@ -181,8 +204,12 @@ public class PayActivity extends Activity implements View.OnClickListener {
         this.startActivityForResult(checkoutIntent, REQUEST_PAYPAL_CHECKOUT);
     }
 
+    public void FreeButtonClick(View arg0) {
+        orderSucceeded();
+    }
+
     private void showPayPalButton() {
-        removePayPalButton();
+        removeButtons();
 // Generate the PayPal checkout button and save it for later use
         PayPal pp = PayPal.getInstance();
         launchPayPalButton = pp.getCheckoutButton(this, PayPal.BUTTON_278x43, CheckoutButton.TEXT_PAY);
@@ -203,12 +230,42 @@ public class PayActivity extends Activity implements View.OnClickListener {
 
     }
 
+    private void showFreeButton() {
+        removeButtons();
+        freeButton = new Button(this);
+        freeButton.setText(R.string.order_for_free);
+        freeButton.setOnClickListener(this);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        params.bottomMargin = 10;
+        freeButton.setLayoutParams(params);
+
+        freeButton.setId(FREE_BUTTON_ID);
+        ((RelativeLayout) findViewById(R.id.activity_pay)).addView(freeButton);
+        ((RelativeLayout) findViewById(R.id.activity_pay)).setGravity(Gravity.CENTER_HORIZONTAL);
+
+    }
+
+    private void removeButtons() {
+        removePayPalButton();
+        removeFreeButton();
+    }
+
     private void removePayPalButton() {
-        // Avoid an exception for setting a parent more than once
         if (launchPayPalButton != null) {
             ((RelativeLayout) findViewById(R.id.activity_pay))
                     .removeView(launchPayPalButton);
         }
+        launchPayPalButton = null;
+    }
+
+    private void removeFreeButton() {
+        if (freeButton != null) {
+            ((RelativeLayout) findViewById(R.id.activity_pay))
+                    .removeView(freeButton);
+        }
+        freeButton = null;
     }
 
     @Override
@@ -239,17 +296,50 @@ public class PayActivity extends Activity implements View.OnClickListener {
     }
 
     private void paymentFailed(String errorID, String errorMessage) {
-        //TODO payment failed
+        showPopup("Payment failed", "The payment for the song failed.", false);
     }
 
     private void paymentCanceled() {
-        //TODO payment cancelled
+        showPopup("Payment cancelled", "You have cancelled the payment.", false);
+    }
+
+    private void showPopup(String title, String message, Boolean succes) {
+        AlertDialog.Builder helpBuilder = new AlertDialog.Builder(this, R.style.JukeboxAlertDialogStyle);
+        helpBuilder.setTitle(title);
+        helpBuilder.setMessage(message);
+        if (succes) {
+            helpBuilder.setPositiveButton("Ok",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(PayActivity.this, ArtistActivity.class);
+                            PayActivity.this.startActivity(intent);
+                        }
+                    });
+        } else {
+
+            helpBuilder.setPositiveButton("Ok",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            //nothing, just close
+                        }
+                    });
+
+        }
+
+        // Remember, create doesn't show the dialog
+        AlertDialog helpDialog = helpBuilder.create();
+        helpDialog.show();
     }
 
     private void paymentSucceeded(String payKey) {
+        orderSucceeded();
+    }
+
+    private void orderSucceeded() {
         new OrderSong().execute();
-        Intent intent = new Intent(PayActivity.this,ArtistActivity.class);
-        PayActivity.this.startActivity(intent);
+
+        showPopup("Payment succeeded", "You have succesfully ordered: " + artistName + " - " + songName + ".", true);
+
     }
 
 
@@ -277,7 +367,7 @@ public class PayActivity extends Activity implements View.OnClickListener {
                 HttpResponse response = client.execute(request);
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
-
+                    showButtons();
                 } else {
                     Log.i(LOGTAG, "Failed: No entity");
                 }
@@ -300,8 +390,8 @@ public class PayActivity extends Activity implements View.OnClickListener {
             // set adapter after async task has loaded json file.
         }
     }
-/*
-    private class GetPaypal extends AsyncTask<Void, Void, Void> {
+
+    private class GetPaymentInfo extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
             Log.i(LOGTAG, this.getClass().getSimpleName() + " doInBackground");
@@ -310,10 +400,10 @@ public class PayActivity extends Activity implements View.OnClickListener {
                 HttpClient client = new DefaultHttpClient();
                 HttpGet request = new HttpGet();
 
-                String uri = PAYPAL_URL;
+                String uri = PAYMENTINFO_URL;
                 if (jukeboxId != null && artistName.length() > 0) {
                     String jukeboxEncoded = URLEncoder.encode(jukeboxId, "UTF-8");
-                    uri = PAYPAL_URL + "?jukebox=" + jukeboxEncoded;
+                    uri = PAYMENTINFO_URL + "?jukeboxid=" + jukeboxEncoded;
                 }
                 request.setURI(new URI(uri));
 
@@ -321,13 +411,11 @@ public class PayActivity extends Activity implements View.OnClickListener {
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
                     JSONObject respObject = new JSONObject(EntityUtils.toString(entity));
-                    JSONArray songArray = respObject.getJSONArray("allTitles");
-                    for (int i = 0; i < songArray.length(); i++) {
-                        JSONObject jukebox = jukeboxArray.getJSONObject(i);
-                        item.setName(jukebox.getString("name"));
-                        item.setId(jukebox.getString("id"));
-                        listData.add(item);
-                    }
+                    JSONObject paymentInfo = respObject.getJSONObject("paymentInformation");
+                    paymentReceiver = paymentInfo.getString("email");
+                    currency = paymentInfo.getString("currencyCode");
+                    price = new BigDecimal(Double.parseDouble(paymentInfo.getString("pricePerSong")));
+                    jukeboxName = paymentInfo.getString("name");
 
                 } else {
                     Log.i(LOGTAG, "Failed: No entity");
@@ -348,10 +436,7 @@ public class PayActivity extends Activity implements View.OnClickListener {
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
             Log.i(LOGTAG, this.getClass().getSimpleName() + " onPostExecute");
-            // set adapter after async task has loaded json file.
-            payListAdapter = new PayListAdapter(getApplicationContext(), listData);
-            setListAdapter(payListAdapter);
         }
     }
-    */
+
 }
