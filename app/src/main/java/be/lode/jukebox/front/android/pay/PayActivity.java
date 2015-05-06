@@ -65,7 +65,12 @@ public class PayActivity extends Activity implements View.OnClickListener {
         jukeboxId = i.getStringExtra("jukeboxId");
 
         //Start async task
-        new GetPaypal().execute();
+        //TODO
+        //new GetPaypal().execute();
+        paymentReceiver = "lode.deckers-receiver@gmail.com";
+        currency = "EUR";
+        price = new BigDecimal(1.25);
+
 
         if (!paypalLibraryInit)
             initPaypalLibrary();
@@ -295,7 +300,7 @@ public class PayActivity extends Activity implements View.OnClickListener {
             // set adapter after async task has loaded json file.
         }
     }
-
+/*
     private class GetPaypal extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
@@ -348,4 +353,5 @@ public class PayActivity extends Activity implements View.OnClickListener {
             setListAdapter(payListAdapter);
         }
     }
+    */
 }
