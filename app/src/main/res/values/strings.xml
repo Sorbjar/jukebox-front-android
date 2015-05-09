@@ -12,4 +12,5 @@
     <string name="title_activity_pay">Payment</string>
     <string name="title_activity_artist">Artists</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_qrscanner">QRScannerActivity</string>
 </resources>

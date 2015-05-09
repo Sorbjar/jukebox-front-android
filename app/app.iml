@@ -85,11 +85,17 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 22 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" exported="" name="zxing-android-legacy-2.0.1" level="project" />
+    <orderEntry type="library" exported="" name="core-2.0" level="project" />
     <orderEntry type="library" exported="" name="facebook-android-sdk-4.0.1" level="project" />
+    <orderEntry type="library" exported="" name="core-3.2.0" level="project" />
+    <orderEntry type="library" exported="" name="android-2.0" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-22.1.1" level="project" />
     <orderEntry type="library" exported="" name="support-v4-22.1.1" level="project" />
     <orderEntry type="library" exported="" name="bolts-android-1.1.4" level="project" />
+    <orderEntry type="library" exported="" name="zxing-android-integration-2.0.1" level="project" />
     <orderEntry type="library" exported="" name="PayPal_MPL" level="project" />
+    <orderEntry type="library" exported="" name="zxing-android-embedded-2.0.1" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-22.1.1" level="project" />
   </component>
 </module>

@@ -135,6 +135,7 @@ public class ChooseJukeboxActivity extends ListActivity {
                         listData.add(item);
                     }
 
+
                 } else {
                     Log.i(LOGTAG, "Failed: No entity");
                 }
