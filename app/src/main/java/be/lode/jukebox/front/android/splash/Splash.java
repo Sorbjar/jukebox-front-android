@@ -8,7 +8,7 @@ import android.util.Log;
 
 import be.lode.jukebox.front.android.Constants;
 import be.lode.jukebox.front.android.R;
-import be.lode.jukebox.front.android.qrscanner.QRScannerActivity;
+import be.lode.jukebox.front.android.login.LoginActivity;
 
 public class Splash extends Activity {
 
@@ -29,8 +29,8 @@ public class Splash extends Activity {
             @Override
             public void run() {
                 /* Create an Intent that will start the Menu-Activity. */
-                //Intent intent = new Intent(Splash.this,LoginActivity.class);
-                Intent intent = new Intent(Splash.this,QRScannerActivity.class);
+                Intent intent = new Intent(Splash.this,LoginActivity.class);
+                //Intent intent = new Intent(Splash.this,QRScannerActivity.class);
                 Splash.this.startActivity(intent);
                 Splash.this.finish();
             }

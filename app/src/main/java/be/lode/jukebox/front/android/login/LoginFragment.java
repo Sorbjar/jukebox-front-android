@@ -77,16 +77,6 @@ public class LoginFragment extends Fragment {
                         nextPage(newProfile);
                 }
             };
-            pt.startTracking();
-        }
-    }
-
-    private void closeProfileTracker()
-    {
-        if(pt != null)
-        {
-            pt.stopTracking();
-            pt = null;
         }
     }
 
@@ -121,11 +111,5 @@ public class LoginFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        closeProfileTracker();
     }
 }

@@ -7,6 +7,14 @@
     android:background="@color/background"
     tools:context="be.lode.jukebox.front.android.choosejukebox.ChooseJukeboxActivity">
 
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Scan a QR code for jukebox"
+        android:id="@+id/button_scan"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
     <ListView
         android:id="@android:id/list"
         android:layout_width="fill_parent"
@@ -19,6 +27,9 @@
         android:fadingEdge="none"
         android:footerDividersEnabled="true"
         android:headerDividersEnabled="true"
-        />
+        android:layout_below="@+id/button_scan"
+        android:layout_alignParentStart="true" />
+
+
 
 </RelativeLayout>

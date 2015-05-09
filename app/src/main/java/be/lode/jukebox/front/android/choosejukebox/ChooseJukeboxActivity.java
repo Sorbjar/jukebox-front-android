@@ -1,17 +1,22 @@
 package be.lode.jukebox.front.android.choosejukebox;
 
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.facebook.Profile;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -40,12 +45,14 @@ public class ChooseJukeboxActivity extends ListActivity {
     private String serviceName;
     private String serviceId;
     private Profile profile;
+    private Button scanButton;
+    private String registerUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(LOGTAG, this.getClass().getSimpleName() + " onCreate");
-        setContentView(R.layout.activity_song);
+        setContentView(R.layout.activity_choose_jukebox);
 
         Intent i = getIntent();
 
@@ -54,8 +61,77 @@ public class ChooseJukeboxActivity extends ListActivity {
         profile = Profile.getCurrentProfile();
         serviceId  = profile.getId();
 
+        scanButton = (Button) findViewById(R.id.button_scan);
+        scanButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                openBarCodeScanner();
+            }
+        });
+
         //Start async task
         new GetJukebox().execute();
+    }
+
+    private void openBarCodeScanner() {
+        IntentIntegrator integrator = new IntentIntegrator(ChooseJukeboxActivity.this);
+        integrator.initiateScan();
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (scanResult != null && scanResult.getContents() != null) {
+            String re = scanResult.getContents();
+            Log.i(LOGTAG, this.getClass().getSimpleName() + " scanResult" + re);
+            //TODO use regex to solve return
+            if(re.contains("jukeboxid") && re.contains("registercustomer"))
+            {
+                Profile profile = Profile.getCurrentProfile();
+
+                this.registerUrl = re;
+                this.serviceName = "facebook";
+                this.serviceId = profile.getId();
+                new RegisterCustomer().execute();
+                String jbId = re.substring(re.lastIndexOf("=") + 1);
+                openArtists(jbId);
+            }
+            else
+            {
+                showPopup("Register failed", "This is not a jukbeox login QR", false);
+            }
+        }
+        else
+        {
+            showPopup("Register failed", "Failed to register to the jukebox", false);
+        }
+    }
+
+    private void showPopup(String title, String message, Boolean succes) {
+        AlertDialog.Builder helpBuilder = new AlertDialog.Builder(this, R.style.JukeboxAlertDialogStyle);
+        helpBuilder.setTitle(title);
+        helpBuilder.setMessage(message);
+        if (succes) {
+            helpBuilder.setPositiveButton("Ok",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // not used
+                        }
+                    });
+        } else {
+
+            helpBuilder.setPositiveButton("Ok",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            //return to choosejukebox view
+                        }
+                    });
+
+        }
+
+        // Remember, create doesn't show the dialog
+        AlertDialog helpDialog = helpBuilder.create();
+        helpDialog.show();
     }
 
     @Override
@@ -65,10 +141,12 @@ public class ChooseJukeboxActivity extends ListActivity {
 
         Object o = jukeboxListAdapter.getItem(position);
         JukeboxItem jukeboxData = (JukeboxItem) o;
+        openArtists(jukeboxData.getId());
+    }
 
-        //serialize the data of the food and put as extra in an Intent.
+    private void openArtists(String id) {
         Intent i = new Intent(ChooseJukeboxActivity.this, ArtistActivity.class);
-        i.putExtra("jukeboxId", jukeboxData.getId());
+        i.putExtra("jukeboxId", id);
         startActivityForResult(i, SHOW_ARTISTS_ITEM);
     }
 
@@ -102,18 +180,18 @@ public class ChooseJukeboxActivity extends ListActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class GetJukebox extends AsyncTask<Void, Void, Void> {
+    private class RegisterCustomer  extends AsyncTask<Void, Void, Void> {
+
         @Override
         protected Void doInBackground(Void... params) {
             Log.i(LOGTAG, this.getClass().getSimpleName() + " doInBackground");
-            // Loads JSON file and process data
             try {
                 HttpClient client = new DefaultHttpClient();
                 HttpGet request = new HttpGet();
 
                 String uri = JUKEBOX_URL;
 
-                if(serviceName != null && serviceName.length() > 0 && serviceId != null && serviceId.length() > 0) {
+                if (serviceName != null && serviceName.length() > 0 && serviceId != null && serviceId.length() > 0) {
                     String serviceNameEncoded = URLEncoder.encode(serviceName, "UTF-8");
                     String serviceIdEncoded = URLEncoder.encode(serviceId, "UTF-8");
                     uri = JUKEBOX_URL + "?servicename=" + serviceNameEncoded + "&serviceid=" + serviceId;
@@ -139,8 +217,52 @@ public class ChooseJukeboxActivity extends ListActivity {
                 } else {
                     Log.i(LOGTAG, "Failed: No entity");
                 }
-            }catch(Exception e){
-                Log.i(LOGTAG,"Exception occurred: " + e.toString());
+            } catch (Exception e) {
+                Log.i(LOGTAG, "Exception occurred: " + e.toString());
+            }
+            if (listData.size() == 0)
+            {
+                openBarCodeScanner();
+            }
+            return null;
+        }
+    }
+
+    private class GetJukebox extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.i(LOGTAG, this.getClass().getSimpleName() + " doInBackground");
+            // Loads JSON file and process data
+            try {
+                HttpClient client = new DefaultHttpClient();
+                HttpGet request = new HttpGet();
+
+                String uri = registerUrl;
+
+                if (serviceName != null && serviceName.length() > 0 && serviceId != null && serviceId.length() > 0) {
+                    String serviceNameEncoded = URLEncoder.encode(serviceName, "UTF-8");
+                    String serviceIdEncoded = URLEncoder.encode(serviceId, "UTF-8");
+                    uri = registerUrl + "&servicename=" + serviceNameEncoded + "&serviceid=" + serviceId;
+                }
+
+
+                request.setURI(new URI(uri));
+
+                HttpResponse response = client.execute(request);
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    Log.i(LOGTAG, "Register Succes");
+
+
+                } else {
+                    Log.i(LOGTAG, "Failed: No entity");
+                }
+            } catch (Exception e) {
+                Log.i(LOGTAG, "Exception occurred: " + e.toString());
+            }
+            if (listData.size() == 0)
+            {
+                openBarCodeScanner();
             }
             return null;
         }
