@@ -59,9 +59,8 @@ public class LoginFragment extends Fragment {
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
-        instantiateProfileTracker();
-
         Profile profile = Profile.getCurrentProfile();
+        instantiateProfileTracker();
         if(profile != null)
         {
             nextPage(profile);
@@ -69,7 +68,7 @@ public class LoginFragment extends Fragment {
     }
 
     private void instantiateProfileTracker() {
-        if(pt != null) {
+        if(pt == null) {
             pt = new ProfileTracker() {
                 @Override
                 protected void onCurrentProfileChanged(Profile oldProfile, Profile newProfile) {

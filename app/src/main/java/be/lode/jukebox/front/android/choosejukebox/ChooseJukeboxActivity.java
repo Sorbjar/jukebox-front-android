@@ -198,6 +198,49 @@ public class ChooseJukeboxActivity extends ListActivity {
                 HttpClient client = new DefaultHttpClient();
                 HttpGet request = new HttpGet();
 
+                String uri = registerUrl;
+
+                if (serviceName != null && serviceName.length() > 0 && serviceId != null && serviceId.length() > 0) {
+                    String serviceNameEncoded = URLEncoder.encode(serviceName, "UTF-8");
+                    String serviceIdEncoded = URLEncoder.encode(serviceId, "UTF-8");
+                    uri = registerUrl + "&servicename=" + serviceNameEncoded + "&serviceid=" + serviceId;
+                }
+
+                request.setURI(new URI(uri));
+
+                HttpResponse response = client.execute(request);
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    Log.i(LOGTAG, "Register Succes");
+
+
+                } else {
+                    Log.i(LOGTAG, "Failed: No entity");
+                }
+            } catch (Exception e) {
+                Log.i(LOGTAG, "Exception occurred: " + e.toString());
+            }
+            if (listData.size() == 0)
+            {
+                openBarCodeScanner();
+            }
+            return null;
+
+
+
+        }
+    }
+
+    private class GetJukebox extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.i(LOGTAG, this.getClass().getSimpleName() + " doInBackground");
+            // Loads JSON file and process data
+            try {
+                HttpClient client = new DefaultHttpClient();
+                HttpGet request = new HttpGet();
+
+
                 String uri = JUKEBOX_URL;
 
                 if (serviceName != null && serviceName.length() > 0 && serviceId != null && serviceId.length() > 0) {
@@ -205,7 +248,6 @@ public class ChooseJukeboxActivity extends ListActivity {
                     String serviceIdEncoded = URLEncoder.encode(serviceId, "UTF-8");
                     uri = JUKEBOX_URL + "?servicename=" + serviceNameEncoded + "&serviceid=" + serviceId;
                 }
-
 
                 request.setURI(new URI(uri));
 
@@ -234,46 +276,8 @@ public class ChooseJukeboxActivity extends ListActivity {
                 openBarCodeScanner();
             }
             return null;
-        }
-    }
-
-    private class GetJukebox extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... params) {
-            Log.i(LOGTAG, this.getClass().getSimpleName() + " doInBackground");
-            // Loads JSON file and process data
-            try {
-                HttpClient client = new DefaultHttpClient();
-                HttpGet request = new HttpGet();
-
-                String uri = registerUrl;
-
-                if (serviceName != null && serviceName.length() > 0 && serviceId != null && serviceId.length() > 0) {
-                    String serviceNameEncoded = URLEncoder.encode(serviceName, "UTF-8");
-                    String serviceIdEncoded = URLEncoder.encode(serviceId, "UTF-8");
-                    uri = registerUrl + "&servicename=" + serviceNameEncoded + "&serviceid=" + serviceId;
-                }
 
 
-                request.setURI(new URI(uri));
-
-                HttpResponse response = client.execute(request);
-                HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                    Log.i(LOGTAG, "Register Succes");
-
-
-                } else {
-                    Log.i(LOGTAG, "Failed: No entity");
-                }
-            } catch (Exception e) {
-                Log.i(LOGTAG, "Exception occurred: " + e.toString());
-            }
-            if (listData.size() == 0)
-            {
-                openBarCodeScanner();
-            }
-            return null;
         }
 
         @Override
