@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.facebook.login.LoginManager;
 import com.paypal.android.MEP.CheckoutButton;
 import com.paypal.android.MEP.PayPal;
 import com.paypal.android.MEP.PayPalActivity;
@@ -36,6 +37,8 @@ import java.text.DecimalFormat;
 import be.lode.jukebox.front.android.Constants;
 import be.lode.jukebox.front.android.R;
 import be.lode.jukebox.front.android.artist.ArtistActivity;
+import be.lode.jukebox.front.android.login.LoginActivity;
+import be.lode.jukebox.front.android.song.SongActivity;
 
 public class PayActivity extends Activity implements View.OnClickListener {
 
@@ -119,6 +122,7 @@ public class PayActivity extends Activity implements View.OnClickListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.i(LOGTAG, this.getClass().getSimpleName() + " onOptionsItemSelected");
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -126,6 +130,10 @@ public class PayActivity extends Activity implements View.OnClickListener {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_logout) {
+            LoginManager.getInstance().logOut();
+            Intent intent = new Intent(PayActivity.this,LoginActivity.class);
+            PayActivity.this.startActivity(intent);
+            PayActivity.this.finish();
             return true;
         }
 

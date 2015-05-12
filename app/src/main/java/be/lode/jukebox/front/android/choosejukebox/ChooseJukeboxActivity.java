@@ -15,6 +15,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.facebook.Profile;
+import com.facebook.login.LoginManager;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import be.lode.jukebox.front.android.Constants;
 import be.lode.jukebox.front.android.R;
 import be.lode.jukebox.front.android.artist.ArtistActivity;
+import be.lode.jukebox.front.android.login.LoginActivity;
 
 public class ChooseJukeboxActivity extends ListActivity {
 
@@ -103,7 +105,10 @@ public class ChooseJukeboxActivity extends ListActivity {
         }
         else
         {
-            showPopup("Register failed", "Failed to register to the jukebox", false);
+            // if intent is null, the back key was pressed
+            //TODO Test
+            if(intent != null)
+                showPopup("Register failed", "Failed to register to the jukebox", false);
         }
     }
 
@@ -174,6 +179,10 @@ public class ChooseJukeboxActivity extends ListActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_logout) {
+            LoginManager.getInstance().logOut();
+            Intent intent = new Intent(ChooseJukeboxActivity.this,LoginActivity.class);
+            ChooseJukeboxActivity.this.startActivity(intent);
+            ChooseJukeboxActivity.this.finish();
             return true;
         }
 

@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import com.facebook.login.LoginManager;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 
 import be.lode.jukebox.front.android.Constants;
 import be.lode.jukebox.front.android.R;
+import be.lode.jukebox.front.android.login.LoginActivity;
 import be.lode.jukebox.front.android.song.SongActivity;
 
 
@@ -91,6 +94,10 @@ public class ArtistActivity extends ListActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_logout) {
+            LoginManager.getInstance().logOut();
+            Intent intent = new Intent(ArtistActivity.this,LoginActivity.class);
+            ArtistActivity.this.startActivity(intent);
+            ArtistActivity.this.finish();
             return true;
         }
 
