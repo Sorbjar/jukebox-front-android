@@ -49,9 +49,11 @@ public class LoginFragment extends Fragment {
     }
 
     private void nextPage(Profile profile) {
-        Intent intent = new Intent(getActivity(),ChooseJukeboxActivity.class);
-        getActivity().startActivity(intent);
-        getActivity().finish();
+        if(getActivity()!= null) {
+            Intent intent = new Intent(getActivity(), ChooseJukeboxActivity.class);
+            getActivity().startActivity(intent);
+            getActivity().finish();
+        }
     }
 
     @Override
