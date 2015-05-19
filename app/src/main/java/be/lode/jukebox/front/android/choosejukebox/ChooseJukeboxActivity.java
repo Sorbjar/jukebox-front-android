@@ -105,7 +105,6 @@ public class ChooseJukeboxActivity extends ListActivity {
         else
         {
             // if intent is null, the back key was pressed
-            //TODO Test
             if(intent != null)
                 showPopup("Register failed", "Failed to register to the jukebox", false);
         }

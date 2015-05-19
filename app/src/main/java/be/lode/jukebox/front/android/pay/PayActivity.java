@@ -104,6 +104,9 @@ public class PayActivity extends Activity implements View.OnClickListener {
 
     private void showButtons() {
         new GetPaymentInfo().execute();
+    }
+
+    private void asyncShowButtons() {
         showText();
         if (!paypalLibraryInit)
             initPaypalLibrary();
@@ -112,7 +115,6 @@ public class PayActivity extends Activity implements View.OnClickListener {
         else
             showFreeButton();
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -431,6 +433,7 @@ public class PayActivity extends Activity implements View.OnClickListener {
             } catch (Exception e) {
                 Log.i(LOGTAG, "Exception occurred: " + e.toString());
             }
+            asyncShowButtons();
             return null;
         }
 
