@@ -86,7 +86,6 @@ public class ChooseJukeboxActivity extends ListActivity {
         if (scanResult != null && scanResult.getContents() != null) {
             String re = scanResult.getContents();
             Log.i(LOGTAG, this.getClass().getSimpleName() + " scanResult" + re);
-            //TODO use regex to solve return
             if(re.contains("jukeboxid") && re.contains("registercustomer"))
             {
                 Profile profile = Profile.getCurrentProfile();
@@ -106,7 +105,6 @@ public class ChooseJukeboxActivity extends ListActivity {
         else
         {
             // if intent is null, the back key was pressed
-            //TODO Test
             if(intent != null)
                 showPopup("Register failed", "Failed to register to the jukebox", false);
         }
