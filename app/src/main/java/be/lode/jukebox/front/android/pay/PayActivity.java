@@ -104,16 +104,23 @@ public class PayActivity extends Activity implements View.OnClickListener {
 
     private void showButtons() {
         new GetPaymentInfo().execute();
+        asyncShowButtons();
     }
 
     private void asyncShowButtons() {
-        showText();
-        if (!paypalLibraryInit)
-            initPaypalLibrary();
-        if (price.doubleValue() > 0.0 && paymentReceiver != null && paymentReceiver.length() > 0)
-            showPayPalButton();
-        else
-            showFreeButton();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showText();
+                if (!paypalLibraryInit)
+                    initPaypalLibrary();
+                if (price.doubleValue() > 0.0 && paymentReceiver != null && paymentReceiver.length() > 0)
+                    showPayPalButton();
+                else
+                    showFreeButton();
+            }
+        });
+
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
