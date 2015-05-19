@@ -49,6 +49,7 @@ public class ChooseJukeboxActivity extends ListActivity {
     private Profile profile;
     private Button scanButton;
     private String registerUrl;
+    private String jbId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +87,6 @@ public class ChooseJukeboxActivity extends ListActivity {
         if (scanResult != null && scanResult.getContents() != null) {
             String re = scanResult.getContents();
             Log.i(LOGTAG, this.getClass().getSimpleName() + " scanResult" + re);
-            //TODO use regex to solve return
             if(re.contains("jukeboxid") && re.contains("registercustomer"))
             {
                 Profile profile = Profile.getCurrentProfile();
@@ -94,9 +94,8 @@ public class ChooseJukeboxActivity extends ListActivity {
                 this.registerUrl = re;
                 this.serviceName = "facebook";
                 this.serviceId = profile.getId();
+                jbId = re.substring(re.lastIndexOf("=") + 1);
                 new RegisterCustomer().execute();
-                String jbId = re.substring(re.lastIndexOf("=") + 1);
-                openArtists(jbId);
             }
             else
             {
@@ -212,17 +211,13 @@ public class ChooseJukeboxActivity extends ListActivity {
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
                     Log.i(LOGTAG, "Register Succes");
-
+                    openArtists(jbId);
 
                 } else {
                     Log.i(LOGTAG, "Failed: No entity");
                 }
             } catch (Exception e) {
                 Log.i(LOGTAG, "Exception occurred: " + e.toString());
-            }
-            if (listData.size() == 0)
-            {
-                openBarCodeScanner();
             }
             return null;
 
