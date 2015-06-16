@@ -4,9 +4,9 @@
     <string name="action_logout">Logout</string>
     <string name="title_activity_splash">Splash</string>
     <string name="facebook_app_id">837671609637096</string>
-    <string name="facebook_login_text">Welcome to the jukebox app</string>
+    <string name="facebook_login_text">Welcome to the nyimbox app</string>
     <string name="title_activity_login">Login</string>
-    <string name="title_activity_choose_jukebox">Login to a jukebox</string>
+    <string name="title_activity_choose_jukebox">Login to a nyimbox</string>
     <string name="order_for_free">Order the song for free</string>
     <string name="title_activity_song">Songs</string>
     <string name="title_activity_pay">Payment</string>
